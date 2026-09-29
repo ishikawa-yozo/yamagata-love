@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山形愛♡検定</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:Meiryo,sans-serif;background:linear-gradient(135deg,#6b9fff,#a855f7,#6b9fff);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+.container{background:white;border-radius:20px;padding:30px;max-width:620px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+#start-screen{text-align:center;}
+.title-emoji{font-size:60px;margin-bottom:10px;}
+.title-main{font-size:32px;font-weight:bold;color:#5b21b6;margin-bottom:5px;}
+.title-sub{font-size:16px;color:#666;margin-bottom:20px;}
+.title-desc{background:#f5f0ff;border:2px solid #a855f7;border-radius:12px;padding:20px;margin:20px 0;text-align:left;font-size:14px;line-height:1.8;color:#444;}
+.title-desc h3{color:#5b21b6;font-size:16px;margin-bottom:10px;text-align:center;}
+.rule-item{display:flex;align-items:flex-start;margin:6px 0;}
+.rule-icon{margin-right:8px;}
+.btn-start{background:linear-gradient(135deg,#5b21b6,#a855f7);color:white;border:none;padding:16px;font-size:20px;font-weight:bold;border-radius:50px;cursor:pointer;margin-top:20px;width:100%;transition:all 0.3s;}
+.btn-start:hover{transform:translateY(-2px);}
+#quiz-screen{display:none;}
+.progress-area{display:flex;justify-content:space-between;margin-bottom:15px;}
+.question-num{font-size:14px;color:#888;font-weight:bold;}
+.score-display{font-size:14px;color:#5b21b6;font-weight:bold;}
+.progress-bar{width:100%;height:8px;background:#eee;border-radius:4px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#5b21b6,#a855f7);border-radius:4px;transition:width 0.5s;}
+.question-box{background:#f5f0ff;border-left:5px solid #a855f7;border-radius:0 12px 12px 0;padding:20px;margin-bottom:25px;font-size:18px;font-weight:bold;color:#333;line-height:1.6;min-height:80px;display:flex;align-items:center;}
+.choices{display:flex;flex-direction:column;gap:12px;}
+.choice-btn{background:#f8f8f8;border:2px solid #ddd;border-radius:12px;padding:15px 20px;font-size:16px;cursor:pointer;text-align:left;transition:all 0.2s;color:#333;display:flex;align-items:center;}
+.choice-btn:hover:not(:disabled){background:#f5f0ff;border-color:#a855f7;transform:translateX(5px);}
+.choice-label{background:#5b21b6;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;margin-right:12px;flex-shrink:0;}
+.choice-btn.correct{background:#d4edda;border-color:#28a745;}
+.choice-btn.correct .choice-label{background:#28a745;}
+.choice-btn.wrong{background:#f8d7da;border-color:#dc3545;}
+.choice-btn.wrong .choice-label{background:#dc3545;}
+.choice-btn.show-answer{background:#d4edda;border-color:#28a745;opacity:0.8;}
+.choice-btn.show-answer .choice-label{background:#28a745;}
+.choice-btn:disabled{cursor:not-allowed;}
+.explanation-box{display:none;background:#e8f4fd;border:2px solid #2196F3;border-radius:12px;padding:15px;margin-top:20px;font-size:14px;color:#444;line-height:1.7;}
+.explanation-box.show{display:block;}
+.explanation-title{font-weight:bold;color:#2196F3;margin-bottom:5px;}
+.result-icon{text-align:center;font-size:36px;margin-top:15px;display:none;}
+.result-icon.show{display:block;}
+.btn-next{display:none;background:linear-gradient(135deg,#333,#555);color:white;border:none;padding:14px;font-size:16px;font-weight:bold;border-radius:50px;cursor:pointer;margin-top:20px;width:100%;transition:all 0.3s;}
+.btn-next.show{display:block;}
+#result-screen{display:none;text-align:center;}
+.score-circle{width:150px;height:150px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:20px auto;font-weight:bold;}
+.score-circle.pass{background:linear-gradient(135deg,#28a745,#20c997);color:white;box-shadow:0 10px 30px rgba(40,167,69,0.4);}
+.score-circle.fail{background:linear-gradient(135deg,#dc3545,#ff6b6b);color:white;box-shadow:0 10px 30px rgba(220,53,69,0.4);}
+.score-number{font-size:48px;line-height:1;}
+.score-label{font-size:16px;}
+.certificate{background:linear-gradient(135deg,#f3e8ff,#e9d5ff);border:3px solid #a855f7;border-radius:15px;padding:25px;margin:20px 0;}
+.certificate-title{font-size:13px;color:#888;letter-spacing:3px;}
+.certificate-main{font-size:20px;font-weight:bold;color:#5b21b6;line-height:1.8;margin:10px 0;}
+.certificate-seal{font-size:50px;margin:10px 0;}
+.certificate-date{font-size:13px;color:#888;margin-top:10px;}
+.fail-message{background:#fff0f0;border:2px solid #ffcccc;border-radius:12px;padding:20px;margin:20px 0;color:#666;line-height:1.8;}
+.answer-review{text-align:left;margin:20px 0;}
+.answer-review h3{font-size:16px;color:#555;margin-bottom:12px;border-bottom:2px solid #eee;padding-bottom:8px;}
+.answer-item{display:flex;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.answer-mark{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex-shrink:0;margin-right:10px;margin-top:2px;}
+.answer-mark.correct{background:#28a745;color:white;}
+.answer-mark.wrong{background:#dc3545;color:white;}
+.answer-text{flex:1;color:#444;line-height:1.5;}
+.answer-correct-text{color:#28a745;font-size:12px;}
+.btn-group{display:flex;gap:12px;margin-top:20px;}
+.btn-retry{flex:1;background:linear-gradient(135deg,#5b21b6,#a855f7);color:white;border:none;padding:14px;font-size:15px;font-weight:bold;border-radius:50px;cursor:pointer;transition:all 0.3s;}
+.btn-retry:hover{transform:translateY(-2px);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeIn 0.4s ease forwards;}
+@media(max-width:480px){.container{padding:20px 15px;}.title-main{font-size:26px;}.question-box{font-size:15px;}.choice-btn{font-size:14px;padding:12px 15px;}.btn-group{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- タイトル画面 -->
+  <div id="start-screen">
+    <div class="title-emoji">🍒🏔️⛄</div>
+    <div class="title-main">山形愛♡検定</div>
+    <div class="title-sub">〜 あなたの山形愛を試そう！〜</div>
+    <div class="title-desc">
+      <h3>📋 検定ルール</h3>
+      <div class="rule-item"><span class="rule-icon">🎯</span><span>100問の中からランダムに <strong>10問</strong> 出題</span></div>
+      <div class="rule-item"><span class="rule-icon">📝</span><span>各問題は <strong>3択</strong> 形式</span></div>
+      <div class="rule-item"><span class="rule-icon">✅</span><span><strong>8問以上正解（正解率80%）</strong> で合格！</span></div>
+      <div class="rule-item"><span class="rule-icon">🏆</span><span>合格すると <strong>山形愛♡名誉県民</strong> に認定！</span></div>
+      <div class="rule-item"><span class="rule-icon">📍</span><span>歴史・グルメ・観光・文化など幅広く出題</span></div>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">🌸 検定スタート！</button>
+  </div>
+
+  <!-- 問題画面 -->
+  <div id="quiz-screen">
+    <div class="progress-area">
+      <div class="question-num" id="question-num">第 1 問 / 全 10 問</div>
+      <div class="score-display" id="score-display">正解: 0問</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="question-box" id="question-text"></div>
+    <div class="choices" id="choices"></div>
+    <div class="result-icon" id="result-icon"></div>
+    <div class="explanation-box" id="explanation-box">
+      <div class="explanation-title">💡 解説</div>
+      <div id="explanation-text"></div>
+    </div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">次の問題へ →</button>
+  </div>
+
+  <!-- 結果画面 -->
+  <div id="result-screen">
+    <div id="result-content"></div>
+  </div>
+
+</div>
+
+<script>
+const allQuestions = [
+  {q:"山形県の県庁所在地はどこですか？",
+   choices:["米沢市","山形市","鶴岡市"],answer:1,
+   explanation:"山形市は山形県の県庁所在地で、県の中央部に位置する政治・経済・文化の中心都市です。"},
+
+  {q:"山形県の県の花は何ですか？",
+   choices:["サクラ","ベニバナ","ウメ"],answer:1,
+   explanation:"ベニバナは山形県の県花で、江戸時代から染料・口紅の原料として栽培され山形の代表的な農産物です。"},
+
+  {q:"山形県を代表するさくらんぼのブランド品種は何ですか？",
+   choices:["ナポレオン","佐藤錦","高砂"],answer:1,
+   explanation:"佐藤錦は山形県生まれのさくらんぼの最高級品種で「さくらんぼの王様」と呼ばれています。"},
+
+  {q:"山形県にある東北最高峰の山はどれですか？",
+   choices:["鳥海山","月山","蔵王山"],answer:0,
+   explanation:"鳥海山（ちょうかいさん）は標高2,236mで東北最高峰の山です。山形県と秋田県の県境に位置しています。"},
+
+  {q:"蔵王温泉で冬に見られる有名な自然現象は何ですか？",
+   choices:["流氷","樹氷（スノーモンスター）","オーロラ"],answer:1,
+   explanation:"蔵王の樹氷はアオモリトドマツに雪と氷が付着した「スノーモンスター」とも呼ばれる幻想的な自然現象です。"},
+
+  {q:"山形県を代表する郷土料理・芋煮の主役となる食材は何ですか？",
+   choices:["じゃがいも","里芋","サツマイモ"],answer:1,
+   explanation:"山形の芋煮は里芋を使った鍋料理で、毎年9月に最上川河川敷で行われる「日本一の芋煮会」は有名です。"},
+
+  {q:"山形県で将棋駒の生産が盛んな都市はどこですか？",
+   choices:["天童市","山形市","寒河江市"],answer:0,
+   explanation:"天童市は全国の将棋駒の約95%を生産する将棋駒の一大産地で「将棋の町」として知られています。"},
+
+  {q:"松尾芭蕉が「奥の細道」で訪れ有名な俳句を詠んだ場所はどこですか？",
+   choices:["山寺（立石寺）","出羽三山","最上峡"],answer:0,
+   explanation:"山寺（立石寺）で芭蕉が詠んだ「閑さや岩にしみ入る蝉の声」は日本を代表する俳句の一つです。"},
+
+  {q:"山形県の庄内地方で生産される有名なブランド米はどれですか？",
+   choices:["魚沼コシヒカリ","つや姫","あきたこまち"],answer:1,
+   explanation:"つや姫は山形県が開発したブランド米で、そのおいしさから全国的に高い評価を得ています。"},
+
+  {q:"出羽三山に含まれない山はどれですか？",
+   choices:["羽黒山","月山","鳥海山"],answer:2,
+   explanation:"出羽三山は羽黒山・月山・湯殿山の三山を指します。鳥海山は出羽三山には含まれません。"},
+
+  {q:"銀山温泉が有名な理由として正しいのはどれですか？",
+   choices:["日本最古の温泉","大正ロマン風の旅館街","世界遺産に登録されている"],answer:1,
+   explanation:"銀山温泉は大正時代の洋風木造建築が立ち並ぶ旅館街が有名で、NHKドラマのロケ地としても知られます。"},
+
+  {q:"山形県で毎年8月に開催される東北四大祭りの一つはどれですか？",
+   choices:["山形花笠まつり","山形芋煮まつり","山形雪灯篭まつり"],answer:0,
+   explanation:"山形花笠まつりは毎年8月5〜7日に開催される東北四大祭りの一つで、花笠音頭に合わせた踊りが有名です。"},
+
+  {q:"山形県の米沢市で有名なブランド牛はどれですか？",
+   choices:["山形牛","米沢牛","庄内牛"],answer:1,
+   explanation:"米沢牛は日本三大和牛の一つとして知られる最高級ブランド牛で、米沢市周辺で育てられています。"},
+
+  {q:"最上川について正しいのはどれですか？",
+   choices:["日本最長の川","日本三大急流の一つ","世界遺産に登録されている"],answer:1,
+   explanation:"最上川は日本三大急流の一つで、松尾芭蕉も「五月雨をあつめて早し最上川」と詠みました。"},
+
+  {q:"山形県で生産量日本一を誇る果物はどれですか？",
+   choices:["リンゴ","さくらんぼ","ブドウ"],answer:1,
+   explanation:"山形県はさくらんぼの生産量が全国1位で、全国シェアの約70%を占める「さくらんぼ王国」です。"},
+
+  {q:"鶴岡市にある世界一のクラゲ水族館はどれですか？",
+   choices:["加茂水族館","庄内水族館","鶴岡水族館"],answer:0,
+   explanation:"鶴岡市立加茂水族館はクラゲの展示種類数が世界一の水族館で「クラゲドリーム館」とも呼ばれています。"},
+
+  {q:"山形県の伝統的な織物「置賜紬」の産地として有名な都市はどれですか？",
+   choices:["山形市","米沢市","新庄市"],answer:1,
+   explanation:"米沢市を中心とする置賜地方では米沢織（置賜紬）が生産され、国の伝統的工芸品に指定されています。"},
+
+  {q:"山形県にある日本百名山でスキーリゾートとしても有名な山はどれですか？",
+   choices:["朝日岳","蔵王山","葉山"],answer:1,
+   explanation:"蔵王山は山形・宮城両県にまたがる火山で、蔵王温泉スキー場は日本有数のスキーリゾートとして知られています。"},
+
+  {q:"山形県の郷土料理「だし」とはどのような料理ですか？",
+   choices:["魚介類のスープ","夏野菜を細かく刻んだ薬味","山菜の煮物"],answer:1,
+   explanation:"「だし」はキュウリ・ナス・オクラなどの夏野菜を細かく刻んで醤油などで和えた山形の郷土料理です。"},
+
+  {q:"山形県の県の木は何ですか？",
+   choices:["スギ","サクランボの木","ケヤキ"],answer:2,
+   explanation:"ケヤキは山形県の県木です。山形市内にも多くのケヤキが植えられています。"},
+
+{q:"山形県の面積は全国で何番目に大きいですか？",
+   choices:["3番目","6番目","10番目"],answer:1,
+   explanation:"山形県の面積は約9,323㎢で全国6番目の広さを誇ります。"},
+
+  {q:"山形県の人口は約何万人ですか？",
+   choices:["約50万人","約80万人","約110万人"],answer:2,
+   explanation:"山形県の人口は約110万人前後で、少子高齢化による人口減少が課題となっています。"},
+
+  {q:"山形県の県の鳥は何ですか？",
+   choices:["ハクチョウ","オシドリ","トキ"],answer:1,
+   explanation:"オシドリは山形県の県鳥です。山形県内の河川や湖沼で見ることができます。"},
+
+  {q:"山形県の県の獣は何ですか？",
+   choices:["ツキノワグマ","カモシカ","キツネ"],answer:1,
+   explanation:"カモシカは山形県の県獣で、山形県内の山岳地帯に生息しています。国の特別天然記念物です。"},
+
+  {q:"山形県の形として正しいのはどれですか？",
+   choices:["東西に長い形","南北に長い形","ほぼ正方形"],answer:1,
+   explanation:"山形県は南北に長い形をしており、内陸部と庄内平野（日本海側）の2つの地域に大きく分かれます。"},
+
+  {q:"山形県の主な地方区分として正しいのはどれですか？",
+   choices:["村山・置賜・最上・庄内","山形・米沢・酒田・新庄","内陸・沿岸・山間・平野"],answer:0,
+   explanation:"山形県は村山・置賜・最上・庄内の4つの地方に区分されます。それぞれ文化や気候が異なります。"},
+
+  {q:"山形市で毎年2月に開催される冬のイベントは何ですか？",
+   choices:["山形雪灯篭まつり","蔵王樹氷まつり","山形冬物語"],answer:0,
+   explanation:"山形雪灯篭まつりは毎年2月に山形城跡（霞城公園）で開催される冬の風物詩です。"},
+
+  {q:"山形県の酒田市にある有名な旧家・豪商の屋敷はどれですか？",
+   choices:["本間家旧本邸","鶴岡城","最上屋敷"],answer:0,
+   explanation:"本間家は江戸時代に「本間様には及びもないが、せめてなりたや殿様に」と謳われた豪商の旧家です。"},
+
+  {q:"山形県の庄内地方にある有名な神社はどれですか？",
+   choices:["出羽神社（三神合祭殿）","山形八幡宮","最上神社"],answer:0,
+   explanation:"出羽三山の羽黒山山頂にある出羽神社（三神合祭殿）は庄内地方を代表する由緒ある神社です。"},
+
+  {q:"山形県で生産される「だだちゃ豆」はどこの名産品ですか？",
+   choices:["山形市","鶴岡市","酒田市"],answer:1,
+   explanation:"だだちゃ豆は鶴岡市の特産品で、強い甘みと風味が特徴の枝豆の一種です。鶴岡市でしか栽培されません。"},
+
+  {q:"山形県の新庄市で毎年8月に開催される祭りは何ですか？",
+   choices:["新庄まつり","最上川まつり","新庄花笠まつり"],answer:0,
+   explanation:"新庄まつりは毎年8月24〜26日に開催される山形県北部の代表的な祭りで、絢爛豪華な山車が特徴です。"},
+
+  {q:"山形県の寒河江市で有名な果物は何ですか？",
+   choices:["ラ・フランス","モモ","ブドウ"],answer:0,
+   explanation:"寒河江市は西洋梨「ラ・フランス」の生産が盛んで、山形県全体でも全国トップクラスの生産量を誇ります。"},
+
+  {q:"山形県の上山（かみのやま）温泉で有名なのは何ですか？",
+   choices:["雪見温泉","足湯の多さ","露天風呂の数"],answer:1,
+   explanation:"上山温泉は市内に多くの足湯が設置されており、気軽に温泉が楽しめる観光地として人気です。"},
+
+  {q:"山形県産のラ・フランスの全国シェアはどのくらいですか？",
+   choices:["約30%","約50%","約80%"],answer:2,
+   explanation:"山形県はラ・フランス（西洋梨）の全国生産量の約80%を占める、日本最大の産地です。"},
+
+  {q:"山形県の米沢市出身の戦国武将は誰ですか？",
+   choices:["伊達政宗","上杉謙信","上杉鷹山"],answer:2,
+   explanation:"上杉鷹山（ようざん）は米沢藩主として藩の財政再建に尽力した名君で、米国大統領ケネディも尊敬した人物です。"},
+
+  {q:"山形県の鉄道路線「山形新幹線」の愛称は何ですか？",
+   choices:["つばさ","やまびこ","はやぶさ"],answer:0,
+   explanation:"山形新幹線の列車名は「つばさ」で、東京〜新庄間を結んでいます。ミニ新幹線として知られています。"},
+
+  {q:"山形県の山寺（立石寺）は何宗のお寺ですか？",
+   choices:["真言宗","天台宗","曹洞宗"],answer:1,
+   explanation:"山寺（立石寺）は860年に慈覚大師円仁が開いた天台宗の寺院で、1,000段以上の石段が有名です。"},
+
+  {q:"山形県の伝統的な保存食「いぶりがっこ」はどの県との共有文化ですか？",
+   choices:["岩手県","宮城県","秋田県"],answer:2,
+   explanation:"いぶりがっこは主に秋田県の郷土食ですが、山形県の内陸部でも同様の燻製たくあんが食べられています。"},
+
+  {q:"山形県の観光地「銀山温泉」がある市町村はどこですか？",
+   choices:["尾花沢市","大石田町","尾花沢市（旧大石田町近辺の旧銀山町）"],answer:0,
+   explanation:"銀山温泉は尾花沢市に位置する温泉地で、大正時代の面影を残す旅館街が人気です。"},
+
+  {q:"山形県の天童市で毎年春に開催される人間将棋の会場はどこですか？",
+   choices:["天童城跡","舞鶴山","天童公園"],answer:1,
+   explanation:"天童市の舞鶴山では毎年春に人間将棋が行われ、実際の人間が将棋の駒となって対局します。"},
+
+  {q:"山形県の酒田市にある有名な米の倉庫群はどれですか？",
+   choices:["山居倉庫","庄内倉庫","最上倉庫"],answer:0,
+   explanation:"山居倉庫は明治時代に建てられた米の保管倉庫で、ケヤキ並木とともに酒田市を代表する観光スポットです。"},
+
+  {q:"山形県の高畠町で有名な観光スポットはどれですか？",
+   choices:["亀岡文殊","烏帽子岩","まほろばの緑道"],answer:2,
+   explanation:"高畠町のまほろばの緑道は廃線となった旧高畠線の線路跡を利用したサイクリングロードで人気です。"},
+
+  {q:"山形県の方言で「めんこい」とはどういう意味ですか？",
+   choices:["おいしい","かわいい","楽しい"],answer:1,
+   explanation:"「めんこい」は東北地方の方言で「かわいい」という意味です。山形県でもよく使われる言葉です。"},
+
+  {q:"山形県の方言で「わや」とはどういう意味ですか？",
+   choices:["すごく・とても","だめ・むちゃくちゃ","急いで"],answer:1,
+   explanation:"「わや」は山形県などの東北地方で使われる方言で「だめ・めちゃくちゃ」という意味です。"},
+
+  {q:"山形県にある日本最古の現存する文書館はどれですか？",
+   choices:["山形県立図書館","致道博物館","文翔館"],answer:2,
+   explanation:"文翔館（山形県郷土館）は大正5年建築の国重要文化財で、旧山形県庁舎として使われた歴史的建造物です。"},
+
+  {q:"山形県の果物の生産が盛んな理由として正しいのはどれですか？",
+   choices:["一年中温暖な気候","昼夜の寒暖差が大きく糖度が上がりやすい","降水量が多く水が豊富"],answer:1,
+   explanation:"山形県は盆地型の気候で昼夜の寒暖差が大きいため、果物の糖度が上がりやすく高品質な果物が育ちます。"},
+
+  {q:"山形県の庄内地方を舞台にした有名な映画監督は誰ですか？",
+   choices:["黒澤明","山田洋次","周防正行"],answer:1,
+   explanation:"山田洋次監督の映画「たそがれ清兵衛」など、山形県庄内地方を舞台にした時代劇が多く制作されています。"},
+
+  {q:"山形県の伝統芸能「黒川能」が行われる地域はどこですか？",
+   choices:["鶴岡市","山形市","酒田市"],answer:0,
+   explanation:"黒川能は鶴岡市黒川地区に伝わる能楽で、国の重要無形民俗文化財に指定されています。"},
+
+  {q:"山形県の最上川について、全長は何kmですか？",
+   choices:["約100km","約229km","約350km"],answer:1,
+   explanation:"最上川の全長は約229kmで、山形県内のみを流れる一級河川として日本でも珍しい存在です。"},
+
+  {q:"山形県の「芋煮」で使われる肉として村山地方で一般的なのはどれですか？",
+   choices:["鶏肉","豚肉","牛肉"],answer:2,
+   explanation:"村山地方（山形市周辺）の芋煮は牛肉と醤油ベースが定番ですが、庄内地方では豚肉と味噌ベースが主流です。"},
+
+  {q:"山形県の米沢市にある上杉神社で祀られているのは誰ですか？",
+   choices:["上杉謙信","上杉鷹山","上杉景勝"],answer:0,
+   explanation:"上杉神社には米沢藩の藩祖・上杉謙信が祀られています。米沢城跡に位置する米沢市の中心的な神社です。"},
+
+  {q:"山形県の酒田市で行われる伝統行事「山王祭」は何月に開催されますか？",
+   choices:["3月","6月","9月"],answer:1,
+   explanation:"酒田市の日枝神社例大祭「山王祭」は毎年6月に開催される酒田を代表する伝統的なお祭りです。"},
+
+  {q:"山形県の特産品「民田なす」はどこの名産ですか？",
+   choices:["鶴岡市","山形市","天童市"],answer:0,
+   explanation:"民田なすは鶴岡市民田地区に伝わる小粒の伝統野菜で、漬物に適した品種として知られています。"},
+
+  {q:"山形県の飯豊山（いいでさん）について正しいのはどれですか？",
+   choices:["日本百名山の一つ","世界遺産に登録されている","山形県最高峰"],answer:0,
+   explanation:"飯豊山は日本百名山の一つで、山形・福島・新潟の3県にまたがる雄大な山です。"},
+
+  {q:"山形県の温泉地「肘折温泉」がある地域はどこですか？",
+   choices:["最上地方","置賜地方","村山地方"],answer:0,
+   explanation:"肘折温泉は最上地方の大蔵村に位置する温泉地で、豪雪地帯として知られ冬の雪景色も有名です。"},
+
+  {q:"山形県の伝統的な漆器産地として有名な都市はどれですか？",
+   choices:["天童市","山形市","鶴岡市"],answer:1,
+   explanation:"山形市は山形漆器の産地として知られ、国の伝統的工芸品に指定されています。"},
+
+  {q:"山形県の庄内地方で信仰される「山の神」として有名なのはどれですか？",
+   choices:["出羽三山信仰","月山信仰","鳥海山信仰"],answer:0,
+   explanation:"出羽三山（羽黒山・月山・湯殿山）への信仰は庄内地方を中心に古くから続く山岳信仰の代表的なものです。"},
+
+  {q:"山形県で生産される日本酒として有名なブランドはどれですか？",
+   choices:["十四代","田酒","而今"],answer:0,
+   explanation:"「十四代」は山形県村山市の高木酒造が造る日本酒で、入手困難なプレミアム日本酒として全国的に有名です。"},
+
+  {q:"山形県の「赤湯温泉」がある市はどれですか？",
+   choices:["南陽市","米沢市","長井市"],answer:0,
+   explanation:"赤湯温泉は南陽市にある温泉地で、ワインの産地・南陽市のぶどうを使ったワイン風呂でも有名です。"},
+
+  {q:"山形県の鶴岡市にある「致道博物館」の前身は何ですか？",
+   choices:["鶴岡城","旧庄内藩主の屋敷","旧鶴岡市役所"],answer:1,
+   explanation:"致道博物館は旧庄内藩主酒井家の屋敷跡に設置された博物館で、国指定重要文化財の建物が残っています。"},
+
+{q:"山形県の「おしん」の舞台となったロケ地として有名なのはどれですか？",
+   choices:["銀山温泉・最上川周辺","山寺・天童市","米沢・上杉神社"],answer:0,
+   explanation:"NHK朝ドラ「おしん」は山形県の最上川周辺や銀山温泉が主なロケ地となり、山形観光に大きく貢献しました。"},
+
+  {q:"山形県の最上川舟下りで有名な観光スポットはどこですか？",
+   choices:["最上峡（もがみきょう）","天竜峡","最上川河口"],answer:0,
+   explanation:"最上峡は最上川中流の渓谷で、芭蕉も訪れた景勝地として知られ舟下りを楽しむ観光客に人気です。"},
+
+  {q:"山形県の「花笠音頭」に使われる花笠に飾られる花は何ですか？",
+   choices:["桜","紅花","菊"],answer:1,
+   explanation:"花笠音頭の花笠には山形県の県花であるベニバナ（紅花）が飾られています。"},
+
+  {q:"山形県の長井市で有名な花のイベントは何ですか？",
+   choices:["あやめ公園のあやめまつり","バラのまつり","チューリップフェア"],answer:0,
+   explanation:"長井市のあやめ公園では毎年6月に「あやめまつり」が開催され、約100万本のアヤメが咲き誇ります。"},
+
+  {q:"山形県の「月山」は何の霊山として信仰されていますか？",
+   choices:["縁結びの神","死と再生の山（死者の霊が宿る山）","農業の神"],answer:1,
+   explanation:"月山は死者の霊が宿る山として信仰され、出羽三山詣では「死と再生」を体験する修験道の聖地です。"},
+
+  {q:"山形県の方言で「おしょうしな」とはどういう意味ですか？",
+   choices:["おはようございます","ありがとうございます","さようなら"],answer:1,
+   explanation:"「おしょうしな」は山形弁で「ありがとうございます」を意味する言葉で、山形市周辺でよく使われます。"},
+
+  {q:"山形県の「玉こんにゃく」はどのような料理ですか？",
+   choices:["こんにゃくの刺身","醤油で煮た球状のこんにゃく","こんにゃくの天ぷら"],answer:1,
+   explanation:"玉こんにゃくは山形県のソウルフードで、球状のこんにゃくを醤油ベースで煮た串刺しの食べ物です。"},
+
+  {q:"山形県の「最上義光（もがみよしあき）」はどのような人物ですか？",
+   choices:["江戸時代の学者","戦国時代の武将・山形城主","明治時代の政治家"],answer:1,
+   explanation:"最上義光は戦国時代の武将で山形城を拠点に出羽国の大半を支配した山形を代表する戦国大名です。"},
+
+  {q:"山形県の「山形城」の別名は何ですか？",
+   choices:["霞城","鶴岡城","米沢城"],answer:0,
+   explanation:"山形城は「霞城（かじょう）」とも呼ばれ、現在は霞城公園として市民に親しまれています。"},
+
+  {q:"山形県の「庄内平野」はどのような地形ですか？",
+   choices:["内陸の盆地","日本海側の広大な平野","山間の谷"],answer:1,
+   explanation:"庄内平野は山形県西部の日本海側に広がる広大な平野で、日本有数の米どころとして知られています。"},
+
+  {q:"山形県の「羽黒山」にある杉並木は何本の杉が並んでいますか？",
+   choices:["約500本","約2,446本","約5,000本"],answer:1,
+   explanation:"羽黒山の参道には樹齢300〜600年の杉が約2,446本並ぶ国指定天然記念物の杉並木があります。"},
+
+  {q:"山形県の「笹野一刀彫」が有名な地域はどこですか？",
+   choices:["米沢市","山形市","鶴岡市"],answer:0,
+   explanation:"笹野一刀彫は米沢市笹野地区に伝わる伝統工芸品で、1本の木から彫り出した縁起物の玩具が有名です。"},
+
+  {q:"山形県の「蔵王エコーライン」はどのような道路ですか？",
+   choices:["蔵王山を横断する観光道路","最上川沿いの景観道路","庄内平野を縦断する道路"],answer:0,
+   explanation:"蔵王エコーラインは山形・宮城県境の蔵王連峰を横断する観光道路で、春の雪の回廊が有名です。"},
+
+  {q:"山形県の「尾花沢スイカ」はどのような特徴がありますか？",
+   choices:["小玉スイカ","大玉で甘みが強いスイカ","種なしスイカ"],answer:1,
+   explanation:"尾花沢スイカは大玉で甘みが強く、山形県尾花沢市の特産品として全国的に有名なブランドスイカです。"},
+
+  {q:"山形県の「出羽桜（でわざくら）」は何ですか？",
+   choices:["山形県の桜の名品種","天童市の日本酒ブランド","山形県の県花"],answer:1,
+   explanation:"出羽桜は天童市の出羽桜酒造が醸造する山形県を代表する日本酒ブランドで、全国的に高い評価を得ています。"},
+
+  {q:"山形県の「鳥海山」の別名は何ですか？",
+   choices:["出羽富士","庄内富士","東北富士"],answer:1,
+   explanation:"鳥海山はその美しい姿から「庄内富士」とも呼ばれ、山形・秋田両県の人々に愛される名山です。"},
+
+  {q:"山形県の「山形新幹線」が開業したのはいつですか？",
+   choices:["1982年","1992年","2002年"],answer:1,
+   explanation:"山形新幹線（つばさ）は1992年に東京〜山形間で開業しました。日本初のミニ新幹線として注目されました。"},
+
+  {q:"山形県産の食用菊として有名なのは何ですか？",
+   choices:["もってのほか","かきのもと","はなびら"],answer:0,
+   explanation:"「もってのほか」は山形県を代表する食用菊の品種で、「もってのほかうまい」が名前の由来とされています。"},
+
+  {q:"山形県の「高湯温泉」はどこにありますか？",
+   choices:["蔵王山麓","鳥海山麓","月山麓"],answer:0,
+   explanation:"高湯温泉は蔵王山麓にある温泉地で、白濁した硫黄泉が特徴の山形県を代表する温泉の一つです。"},
+
+  {q:"山形県の「山居倉庫」がある市はどこですか？",
+   choices:["鶴岡市","酒田市","新庄市"],answer:1,
+   explanation:"山居倉庫は明治時代に建てられた米の保管倉庫で、ケヤキ並木とともに酒田市を代表する観光スポットです。"},
+
+  {q:"山形県の「米沢上杉まつり」で再現される有名な合戦は何ですか？",
+   choices:["川中島の合戦","関ヶ原の合戦","桶狭間の合戦"],answer:0,
+   explanation:"米沢上杉まつりでは上杉謙信と武田信玄が激突した「川中島の合戦」が毎年迫力満点に再現されます。"},
+
+  {q:"山形県の「山形県立博物館」がある公園はどこですか？",
+   choices:["霞城公園","馬見ヶ崎公園","鶴岡公園"],answer:0,
+   explanation:"山形県立博物館は山形城跡の霞城公園内に位置し、山形県の自然・歴史・文化を紹介しています。"},
+
+  {q:"山形県の「芋煮」で庄内地方に多い味付けはどれですか？",
+   choices:["牛肉・醤油味","豚肉・味噌味","鶏肉・塩味"],answer:1,
+   explanation:"庄内地方の芋煮は豚肉と味噌ベースが一般的で、村山地方の牛肉・醤油味とは異なる味わいです。"},
+
+  {q:"山形県の「白鷹町」で有名な伝統工芸はどれですか？",
+   choices:["白鷹紬","白鷹焼き","白鷹漆器"],answer:0,
+   explanation:"白鷹紬は山形県白鷹町に伝わる絹織物で、置賜紬の一つとして国の伝統的工芸品に指定されています。"},
+
+  {q:"山形県の「南陽市」で有名な農産物はどれですか？",
+   choices:["ぶどう・ワイン","リンゴ","桃"],answer:0,
+   explanation:"南陽市はぶどうの栽培が盛んでワインの産地としても知られており、赤湯ワインは全国的に人気があります。"},
+
+  {q:"山形県の「朝日連峰」はどのような特徴がありますか？",
+   choices:["活火山が多い山地","ブナ原生林が広がる山地","砂漠に近い乾燥した山地"],answer:1,
+   explanation:"朝日連峰は山形県と新潟県の県境に広がる山地で、豊かなブナ原生林と清流が広がる自然の宝庫です。"},
+
+  {q:"山形県の「河北町」で有名な農産物はどれですか？",
+   choices:["紅花","サクランボ","リンゴ"],answer:0,
+   explanation:"河北町は山形県でも有数の紅花の産地で、毎年夏には紅花まつりが開催され観光客が訪れます。"},
+
+  {q:"山形県の「文翔館」はもともと何に使われていた建物ですか？",
+   choices:["旧山形県庁舎","旧山形市役所","旧山形裁判所"],answer:0,
+   explanation:"文翔館は大正5年（1916年）に建てられた旧山形県庁舎で、国の重要文化財に指定されています。"},
+
+  {q:"山形県の「寒河江市」で毎年行われるさくらんぼの祭りは何ですか？",
+   choices:["さくらんぼまつり","フルーツフェスタ","チェリーフェスティバル"],answer:0,
+   explanation:"寒河江市では毎年6月にさくらんぼまつりが開催され、さくらんぼの食べ放題など多くのイベントが行われます。"},
+
+  {q:"山形県の「最上川」は全て山形県内を流れますが、何県に隣接していますか？",
+   choices:["福島県・宮城県・秋田県・新潟県","青森県・岩手県・秋田県","福島県・栃木県・群馬県"],answer:0,
+   explanation:"山形県は福島県・宮城県・秋田県・新潟県の4県と隣接しています。最上川は山形県内のみを流れる珍しい一級河川です。"},
+
+  {q:"山形県の「酒田市」はかつて何で栄えた都市ですか？",
+   choices:["鉱山の町","北前船の港町","城下町"],answer:1,
+   explanation:"酒田市は江戸時代に北前船の寄港地として栄え、米や紅花などの物資を全国に運ぶ商業都市として発展しました。"},
+
+  {q:"山形県の「鶴岡市」にある映画の撮影でも使われた古い町並みはどこですか？",
+   choices:["鶴岡カトリック教会周辺","致道博物館周辺","鶴岡城跡周辺"],answer:0,
+   explanation:"鶴岡カトリック教会は明治時代に建てられた西洋建築で、周辺の歴史的な町並みとともに映画やドラマのロケ地になっています。"},
+
+  {q:"山形県の「そば」で有名な地域はどこですか？",
+   choices:["大石田町（大石田そば）","天童市","新庄市"],answer:0,
+   explanation:"大石田町は「大石田そば」で有名な山形県を代表するそばの産地で、毎年多くのそば好きが訪れます。"},
+
+  {q:"山形県の「肘折温泉」で有名な朝市は何と呼ばれますか？",
+   choices:["肘折朝市","湯治朝市","雪国朝市"],answer:0,
+   explanation:"肘折温泉の朝市は温泉街で毎朝開かれる伝統的な市で、地元の野菜や漬物などが並ぶ人気スポットです。"},
+
+  {q:"山形県の「上山城」の別名は何ですか？",
+   choices:["月岡城","霞城","鶴ヶ岡城"],answer:0,
+   explanation:"上山城は「月岡城」とも呼ばれ、現在は復元された天守が上山市のシンボルとして親しまれています。"},
+
+  {q:"山形県で「そば王国」とも呼ばれるほどそばが盛んな理由は何ですか？",
+   choices:["気候と土壌がそばの栽培に適している","そば職人が多い","そばの輸入量が多い"],answer:0,
+   explanation:"山形県は内陸の冷涼な気候と土壌がそばの栽培に適しており、風味豊かなそばが育つ「そば王国」です。"},
+
+  {q:"山形県の「加茂水族館」が世界記録を持つクラゲの展示種類数はおよそ何種類ですか？",
+   choices:["約30種類","約60種類","約100種類"],answer:1,
+   explanation:"鶴岡市立加茂水族館は約60種類以上のクラゲを展示しており、ギネス世界記録に認定されたこともあります。"},
+
+  {q:"山形県の「新庄まつり」の山車（だし）の特徴はどれですか？",
+   choices:["花火が打ち上げられる","絢爛豪華な人形飾りの山車","巨大な灯籠"],answer:1,
+   explanation:"新庄まつりの山車は歴史上の人物や物語を豪華な人形で表現した絢爛豪華なもので、国の重要無形民俗文化財です。"},
+
+  {q:"山形県の「赤湯温泉」で有名な入浴方法はどれですか？",
+   choices:["ワイン風呂","日本酒風呂","牛乳風呂"],answer:0,
+   explanation:"赤湯温泉のある南陽市はぶどうの産地でワインの生産も盛んなため、ワイン風呂が名物となっています。"},
+
+  {q:"山形県の「山形市」の夏の風物詩として有名な食べ物はどれですか？",
+   choices:["冷やしラーメン","冷やし中華","冷やしそば"],answer:0,
+   explanation:"山形市発祥の「冷やしラーメン」は冷たいスープのラーメンで、暑い夏の山形を代表するご当地グルメです。"},
+
+  {q:"山形県の「村山地方」の中心都市はどこですか？",
+   choices:["山形市","天童市","寒河江市"],answer:0,
+   explanation:"山形市は村山地方の中心都市であり、山形県全体の県庁所在地として政治・経済・文化の中心を担っています。"}
+
+];
+
+let currentQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let userAnswers = [];
+
+function getRandomQuestions(num) {
+  const shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, num);
+}
+
+function startQuiz() {
+  currentQuestions = getRandomQuestions(10);
+  currentIndex = 0;
+  score = 0;
+  userAnswers = [];
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = currentQuestions[currentIndex];
+  document.getElementById('progress-fill').style.width = (currentIndex / 10 * 100) + '%';
+  document.getElementById('question-num').textContent = '第 ' + (currentIndex + 1) + ' 問 / 全 10 問';
+  document.getElementById('score-display').textContent = '正解: ' + score + '問';
+  document.getElementById('question-text').textContent = q.q;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  ['A','B','C'].forEach(function(label, index) {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = '<span class="choice-label">' + label + '</span>' + q.choices[index];
+    btn.onclick = function() { selectAnswer(index); };
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById('explanation-box').classList.remove('show');
+  document.getElementById('explanation-text').textContent = '';
+  document.getElementById('result-icon').classList.remove('show');
+  document.getElementById('result-icon').textContent = '';
+  document.getElementById('btn-next').classList.remove('show');
+  document.getElementById('btn-next').textContent = currentIndex === 9 ? '結果を見る 🏁' : '次の問題へ →';
+}
+
+function selectAnswer(selectedIndex) {
+  const q = currentQuestions[currentIndex];
+  const buttons = document.querySelectorAll('.choice-btn');
+  buttons.forEach(function(btn) { btn.disabled = true; });
+
+  const isCorrect = (selectedIndex === q.answer);
+  if (isCorrect) {
+    buttons[selectedIndex].classList.add('correct');
+  } else {
+    buttons[selectedIndex].classList.add('wrong');
+    buttons[q.answer].classList.add('show-answer');
+  }
+
+  const resultIcon = document.getElementById('result-icon');
+  resultIcon.classList.add('show');
+  if (isCorrect) {
+    resultIcon.textContent = '⭕ 正解！';
+    resultIcon.style.color = '#28a745';
+    score++;
+  } else {
+    resultIcon.textContent = '❌ 不正解…';
+    resultIcon.style.color = '#dc3545';
+  }
+
+  document.getElementById('explanation-text').textContent = q.explanation;
+  document.getElementById('explanation-box').classList.add('show');
+  document.getElementById('btn-next').classList.add('show');
+  document.getElementById('score-display').textContent = '正解: ' + score + '問';
+
+  userAnswers.push({
+    question: q.q,
+    isCorrect: isCorrect,
+    correctText: q.choices[q.answer]
+  });
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= 10) {
+    showResult();
+  } else {
+    showQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  const isPassed = score >= 8;
+  const today = new Date();
+  const dateStr = today.getFullYear() + '年' + (today.getMonth() + 1) + '月' + today.getDate() + '日';
+
+  let reviewHTML = '<div class="answer-review"><h3>📋 回答一覧</h3>';
+  userAnswers.forEach(function(ans, i) {
+    reviewHTML += '<div class="answer-item">';
+    reviewHTML += '<div class="answer-mark ' + (ans.isCorrect ? 'correct' : 'wrong') + '">' + (ans.isCorrect ? '○' : '×') + '</div>';
+    reviewHTML += '<div class="answer-text"><div>Q' + (i + 1) + '. ' + ans.question + '</div>';
+    if (!ans.isCorrect) {
+      reviewHTML += '<div class="answer-correct-text">✅ 正解: ' + ans.correctText + '</div>';
+    }
+    reviewHTML += '</div></div>';
+  });
+  reviewHTML += '</div>';
+
+  const btnHTML = '<div class="btn-group"><button class="btn-retry" onclick="startQuiz()">🔄 もう一度挑戦</button><button class="btn-retry" style="background:linear-gradient(135deg,#333,#555);" onclick="backToTop()">🏠 トップへ戻る</button></div>';
+
+  let resultHTML = '';
+  if (isPassed) {
+    resultHTML = '<div class="fade-in">'
+      + '<div style="font-size:24px;font-weight:bold;color:#333;margin-bottom:10px;">🎉 合格おめでとうございます！</div>'
+      + '<div class="score-circle pass"><div class="score-number">' + score + '<span style="font-size:24px;">/10</span></div><div class="score-label">正解</div></div>'
+      + '<div class="certificate">'
+      + '<div class="certificate-title">認　定　証</div>'
+      + '<div class="certificate-seal">🍒</div>'
+      + '<div class="certificate-main">あなたを<br>山形愛♡ある<br>名誉県民として認めます</div>'
+      + '<div style="font-size:13px;color:#666;margin-top:10px;">正解数: ' + score + ' / 10問（正解率 ' + (score * 10) + '%）</div>'
+      + '<div class="certificate-date">認定日: ' + dateStr + '</div>'
+      + '<div style="margin-top:10px;font-size:20px;">🏔️⛄🌸</div>'
+      + '</div>'
+      + reviewHTML + btnHTML + '</div>';
+  } else {
+    resultHTML = '<div class="fade-in">'
+      + '<div style="font-size:24px;font-weight:bold;color:#333;margin-bottom:10px;">結果発表</div>'
+      + '<div class="score-circle fail"><div class="score-number">' + score + '<span style="font-size:24px;">/10</span></div><div class="score-label">正解</div></div>'
+      + '<div class="fail-message">'
+      + '<div style="font-size:18px;font-weight:bold;color:#dc3545;margin-bottom:10px;">😢 残念！不合格です</div>'
+      + '<div>合格ライン: <strong>8問以上</strong></div>'
+      + '<div>あなたの正解数: <strong>' + score + '問 / 10問</strong></div>'
+      + '<div>正解率: <strong>' + (score * 10) + '%</strong></div>'
+      + '<div style="margin-top:10px;">もう一度挑戦して、山形愛♡名誉県民を目指しましょう！</div>'
+      + '</div>'
+      + reviewHTML + btnHTML + '</div>';
+  }
+
+  document.getElementById('result-content').innerHTML = resultHTML;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function backToTop() {
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
